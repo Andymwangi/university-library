@@ -1,8 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import BookCover from "@/components/BookCover";
-;
-
+import { db } from "@/database/drizzle";
+import { users } from "@/database/schema";
+import { eq } from "drizzle-orm";
 
 interface Props extends Book {
   userId: string;
@@ -17,8 +18,16 @@ const BookOverview = async ({
   description,
   coverColor,
   coverUrl,
-
+  id,
+  userId,
 }: Props) => {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+
   return (
     <section className="book-overview">
       <div className="flex flex-1 flex-col gap-5">
