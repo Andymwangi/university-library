@@ -1,33 +1,19 @@
 import React from "react";
 import Image from "next/image";
 import BookCover from "@/components/BookCover";
-import { db } from "@/database/drizzle";
-import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
+import { Button } from "./ui/button";
 
-interface Props extends Book {
-  userId: string;
-}
 const BookOverview = async ({
   title,
   author,
   genre,
   rating,
-  totalCopies,
-  availableCopies,
+  total_copies,
+  available_copies,
   description,
   coverColor,
-  coverUrl,
-  id,
-  userId,
-}: Props) => {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-
+  coverImage,
+}: Book) => {
   return (
     <section className="book-overview">
       <div className="flex flex-1 flex-col gap-5">
@@ -51,16 +37,21 @@ const BookOverview = async ({
 
         <div className="book-copies">
           <p>
-            Total Books <span>{totalCopies}</span>
+            Total Books <span>{total_copies}</span>
           </p>
 
           <p>
-            Available Books <span>{availableCopies}</span>
+            Available Books <span>{available_copies}</span>
           </p>
         </div>
 
         <p className="book-description">{description}</p>
 
+        <Button className="book-overview_btn">
+          <Image src="/icons/book.svg" alt="book" width={20} height={20}></Image>
+          <p className="font-bebas-neue text-xl text-dark-100">Borrow</p>
+        </Button>
+       
       </div>
 
       <div className="relative flex flex-1 justify-center">
@@ -69,14 +60,14 @@ const BookOverview = async ({
             variant="wide"
             className="z-10"
             coverColor={coverColor}
-            coverImage={coverUrl}
+            coverImage={coverImage}
           />
 
           <div className="absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden">
             <BookCover
               variant="wide"
               coverColor={coverColor}
-              coverImage={coverUrl}
+              coverImage={coverImage}
             />
           </div>
         </div>
@@ -85,4 +76,4 @@ const BookOverview = async ({
   );
 };
 
-export default BookOverview;
+export default BookOverview

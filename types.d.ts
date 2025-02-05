@@ -4,14 +4,15 @@ interface Book {
   author: string;
   genre: string;
   rating: number;
-  totalCopies: number;
-  availableCopies: number;
+  total_copies: number;
+  available_copies: number;
   description: string;
   coverColor: string;
-  coverUrl: string;
+  coverImage: string;
   videoUrl: string;
   summary: string;
   createdAt: Date | null;
+  isLoanedBook?: boolean;
 }
 
 interface AuthCredentials {
