@@ -8,7 +8,7 @@ import { signIn } from "@/auth";
 import { headers } from "next/headers";
 import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
-import { workflowClient } from "@/lib/workflow";
+import { sendEmail} from "@/lib/workflow";
 import config from "@/lib/config";
 
 export const signInWithCredentials = async (
@@ -68,14 +68,21 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    await workflowClient.trigger({
-      url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
-      body: {
-        email,
+    await sendEmail({
+      email,
+      subject: "Welcome to the Platform",
+      message: `
+        <html>
+          <div>Hello ${fullName},</div>
+          <div>Welcome to the platform! We're excited to have you with us.</div>
+        </html>
+      `,
+      template_params: {
         fullName,
+        welcome: true,  // Flag for welcome email
+        dashboardUrl: "https://bookwise-libraryapp.vercel.app/",  // Provide dynamic URL if needed
       },
     });
-
     await signInWithCredentials({ email, password });
 
     return { success: true };
