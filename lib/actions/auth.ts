@@ -9,7 +9,7 @@ import { headers } from "next/headers";
 import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
 import config from "@/lib/config";
-import { sendEmail } from "@/lib/workflow";  // Use the EmailJS function directly
+import { sendEmail } from "@/lib/workflow";
 
 export const signInWithCredentials = async (
   params: Pick<AuthCredentials, "email" | "password">
@@ -48,19 +48,30 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    // Directly send the welcome email using EmailJS after sign-up
-    await sendEmail({
-      email,
-      templateId: config.env.emailjs.templateIdWelcome,
+
+    const emailResponse = await sendEmail({
+      email, 
+      templateId: config.env.emailjs.templateIdWelcome, 
       templateParams: {
         user_name: fullName,
         user_email: email,
         subject: "Welcome to the Platform",
         message: `Welcome ${fullName}! We're excited to have you on board.`,
-      },
+      }, 
     });
 
-    await signInWithCredentials({ email, password });
+    if (!emailResponse.success) {
+      console.error("Email sending failed:", emailResponse.error);
+    }
+
+  
+    const loginResponse = await signInWithCredentials({ email, password });
+
+    if (!loginResponse.success) {
+      console.error("Auto sign-in failed:", loginResponse.error);
+      return { success: true, message: "Sign-up successful, but please log in manually." };
+    }
+
     return { success: true };
   } catch (error) {
     console.log(error, "Signup error");

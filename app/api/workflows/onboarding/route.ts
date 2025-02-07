@@ -49,7 +49,7 @@ export const { POST } = serve<InitialData>(async (context) => {
         user_name: fullName,
         user_email: email,
         subject: "Welcome to the Platform",
-        message: `Welcome ${fullName}! We're excited to have you on board.`,
+        message: `Welcome ${fullName}!.`,
       },
     });
   });
