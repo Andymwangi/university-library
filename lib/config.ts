@@ -14,8 +14,13 @@ const config = {
       qstashUrl: process.env.QSTASH_URL!,
       qstashToken: process.env.QSTASH_TOKEN!,
     },
-    resendToken: process.env.RESEND_TOKEN!,
-  },
+    emailjs: {
+      serviceId: process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+      userId: process.env.NEXT_PUBLIC_EMAILJS_USER_ID!,
+      templateIdWelcome: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_WELCOME!,
+      templateIdInactive: process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID_INACTIVE!,
+    },
+  }
 };
 
 export default config;

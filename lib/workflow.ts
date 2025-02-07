@@ -1,35 +1,28 @@
-import { Client as WorkflowClient } from "@upstash/workflow";
-import { Client as QStashClient, resend } from "@upstash/qstash";
+import emailjs from "@emailjs/browser";
 import config from "@/lib/config";
 
-export const workflowClient = new WorkflowClient({
-  baseUrl: config.env.upstash.qstashUrl,
-  token: config.env.upstash.qstashToken,
-});
-
-const qstashClient = new QStashClient({
-  token: config.env.upstash.qstashToken,
-});
-
-export const sendEmail = async ({
-  email,
-  subject,
-  message,
-}: {
+type EmailParams = {
   email: string;
-  subject: string;
-  message: string;
-}) => {
-  await qstashClient.publishJSON({
-    api: {
-      name: "email",
-      provider: resend({ token: config.env.resendToken }),
-    },
-    body: {
-      from: "JS Mastery <contact@adrianjsmastery.com>",
-      to: [email],
-      subject,
-      html: message,
-    },
-  });
+  templateId: string;
+  templateParams: {
+    user_name: string;
+    user_email: string;
+  };
+};
+
+export const sendEmail = async ({ email, templateId, templateParams }: EmailParams) => {
+  try {
+    await emailjs.send(
+      config.env.emailjs.serviceId,
+      templateId,
+      {
+        user_name: templateParams.user_name,
+        user_email: templateParams.user_email,
+      },
+      config.env.emailjs.userId
+    );
+    console.log(`Email sent to ${email} using template ${templateId}`);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 };
