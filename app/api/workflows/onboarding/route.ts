@@ -1,3 +1,4 @@
+// workflows/onboarding.ts
 import { serve } from "@upstash/workflow/nextjs";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
@@ -29,10 +30,7 @@ const getUserState = async (email: string): Promise<UserState> => {
   const now = new Date();
   const timeDifference = now.getTime() - lastActivityDate.getTime();
 
-  if (
-    timeDifference > THREE_DAYS_IN_MS &&
-    timeDifference <= THIRTY_DAYS_IN_MS
-  ) {
+  if (timeDifference > THREE_DAYS_IN_MS && timeDifference <= THIRTY_DAYS_IN_MS) {
     return "non-active";
   }
 
@@ -42,7 +40,7 @@ const getUserState = async (email: string): Promise<UserState> => {
 export const { POST } = serve<InitialData>(async (context) => {
   const { email, fullName } = context.requestPayload;
 
-  // Send Welcome Email
+  // Send Welcome Email on signup
   await context.run("new-signup", async () => {
     await sendEmail({
       email,
@@ -50,10 +48,13 @@ export const { POST } = serve<InitialData>(async (context) => {
       templateParams: {
         user_name: fullName,
         user_email: email,
+        subject: "Welcome to the Platform",
+        message: `Welcome ${fullName}! We're excited to have you on board.`,
       },
     });
   });
 
+  // Wait for 3 days before checking user activity
   await context.sleep("wait-for-3-days", 60 * 60 * 24 * 3);
 
   while (true) {
@@ -69,11 +70,14 @@ export const { POST } = serve<InitialData>(async (context) => {
           templateParams: {
             user_name: fullName,
             user_email: email,
+            subject: "We Miss You!",
+            message: `Hey ${fullName}, we noticed you haven't been active lately. Please come back and check out what's new!`,
           },
         });
       });
     }
 
+    // Wait for 1 month before the next check
     await context.sleep("wait-for-1-month", 60 * 60 * 24 * 30);
   }
 });

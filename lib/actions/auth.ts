@@ -8,30 +8,20 @@ import { signIn } from "@/auth";
 import { headers } from "next/headers";
 import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
-import { workflowClient } from "@/lib/workflow";
 import config from "@/lib/config";
+import { sendEmail } from "@/lib/workflow";  // Use the EmailJS function directly
 
 export const signInWithCredentials = async (
-  params: Pick<AuthCredentials, "email" | "password">,
+  params: Pick<AuthCredentials, "email" | "password">
 ) => {
   const { email, password } = params;
-
   const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
   const { success } = await ratelimit.limit(ip);
-
   if (!success) return redirect("/too-fast");
 
   try {
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      return { success: false, error: result.error };
-    }
-
+    const result = await signIn("credentials", { email, password, redirect: false });
+    if (result?.error) return { success: false, error: result.error };
     return { success: true };
   } catch (error) {
     console.log(error, "Signin error");
@@ -41,24 +31,14 @@ export const signInWithCredentials = async (
 
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, universityId, password, universityCard } = params;
-
   const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
   const { success } = await ratelimit.limit(ip);
-
   if (!success) return redirect("/too-fast");
 
-  const existingUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  if (existingUser.length > 0) {
-    return { success: false, error: "User already exists" };
-  }
+  const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existingUser.length > 0) return { success: false, error: "User already exists" };
 
   const hashedPassword = await hash(password, 10);
-
   try {
     await db.insert(users).values({
       fullName,
@@ -68,16 +48,19 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    await workflowClient.trigger({
-      url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
-      body: {
-        email,
-        fullName,
+    // Directly send the welcome email using EmailJS after sign-up
+    await sendEmail({
+      email,
+      templateId: config.env.emailjs.templateIdWelcome,
+      templateParams: {
+        user_name: fullName,
+        user_email: email,
+        subject: "Welcome to the Platform",
+        message: `Welcome ${fullName}! We're excited to have you on board.`,
       },
     });
 
     await signInWithCredentials({ email, password });
-
     return { success: true };
   } catch (error) {
     console.log(error, "Signup error");
