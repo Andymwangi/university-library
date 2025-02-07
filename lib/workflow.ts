@@ -1,5 +1,5 @@
 // lib/workflow.ts
-import emailjs from "@emailjs/browser";
+import axios from "axios";
 import config from "@/lib/config";
 
 type SendEmailParams = {
@@ -19,18 +19,17 @@ export const sendEmail = async ({
   templateParams,
 }: SendEmailParams) => {
   try {
-    const response = await emailjs.send(
-      config.env.emailjs.serviceId,
-      templateId,
-      {
-        user_name: templateParams.user_name,
-        user_email: templateParams.user_email,
-        subject: templateParams.subject,
-        message: templateParams.message,
+    const response = await axios.post("https://api.emailjs.com/api/v1.0/email/send", {
+      service_id: config.env.emailjs.serviceId,
+      template_id: templateId,
+      user_id: config.env.emailjs.userId,
+      template_params: {
+        ...templateParams,
+        to_email: email,  // Include recipient email if required by your template
       },
-      config.env.emailjs.userId
-    );
-    console.log(`Email sent successfully to ${email} using template ${templateId}:`, response);
+    });
+    console.log("Email sent successfully:", response.data);
+    return response.data;
   } catch (error) {
     console.error("Error sending email:", error);
     throw new Error("Failed to send email");

@@ -77,7 +77,7 @@ export const { POST } = serve<InitialData>(async (context) => {
       });
     }
 
-    // Wait for 1 month before the next check
+    // Wait for 1 month before rechecking
     await context.sleep("wait-for-1-month", 60 * 60 * 24 * 30);
   }
 });
