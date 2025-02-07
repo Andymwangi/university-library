@@ -1,4 +1,3 @@
-// lib/workflow.ts
 import axios from "axios";
 import config from "@/lib/config";
 
@@ -19,15 +18,23 @@ export const sendEmail = async ({
   templateParams,
 }: SendEmailParams) => {
   try {
-    const response = await axios.post("https://api.emailjs.com/api/v1.0/email/send", {
-      service_id: config.env.emailjs.serviceId,
-      template_id: templateId,
-      user_id: config.env.emailjs.userId,
-      template_params: {
-        ...templateParams,
-        to_email: email,  // Include recipient email if required by your template
+    const response = await axios.post(
+      "https://api.emailjs.com/api/v1.0/email/send",
+      {
+        service_id: config.env.emailjs.serviceId,
+        template_id: templateId,
+        user_id: config.env.emailjs.userId,
+        template_params: {
+          ...templateParams,
+          to_email: email, // if your template expects this field
+        },
       },
-    });
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     console.log("Email sent successfully:", response.data);
     return response.data;
   } catch (error) {
