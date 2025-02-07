@@ -1,4 +1,3 @@
-
 import React from "react";
 import BookCard from "@/components/BookCard";
 
@@ -9,7 +8,7 @@ interface Props {
 }
 
 const BookList = ({ title, books, containerClassName }: Props) => {
-
+  if (books.length < 2) return;
 
   return (
     <section className={containerClassName}>
@@ -23,5 +22,4 @@ const BookList = ({ title, books, containerClassName }: Props) => {
     </section>
   );
 };
-
-export default BookList
+export default BookList;
