@@ -18,7 +18,7 @@ const BookOverview = async ({
   availableCopies,
   description,
   coverColor,
-  coverImage,
+  coverUrl,
   id,
   userId,
 }: Props) => {
@@ -83,14 +83,14 @@ const BookOverview = async ({
             variant="wide"
             className="z-10"
             coverColor={coverColor}
-            coverImage={coverImage}
+            coverImage={coverUrl}
           />
 
           <div className="absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden">
             <BookCover
               variant="wide"
               coverColor={coverColor}
-              coverImage={coverImage}
+              coverImage={coverUrl}
             />
           </div>
         </div>
